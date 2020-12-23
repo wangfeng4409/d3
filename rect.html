@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script src="./d3.min.js"></script>
+  <script>
+// 画布大小
+const width = 400;  //画布的宽度
+const height = 400; //画布的高度
+
+// 在body里添加一个SVG画布
+const svg = d3.select('body')     //选择文档中的body元素
+              .append('svg')      //添加一个svg元素
+              .attr('width', width)  //设定宽度
+              .attr('height', height); //设定高度
+
+// 画布周边的空白
+const margin = { top: 60, right: 30, bottom: 60, left: 50 }
+const innerWidth = width - margin.left - margin.right // 画布中内容的宽度
+const innerHeight = height - margin.top - margin.bottom // 画布中内容的高度
+
+// 定义一个数组
+const dataset = [ 10, 20 , 30, 40, 33, 24, 12, 5];
+
+// x 轴比例尺
+const xScale = d3.scaleBand()
+                  .domain(dataset.map((d, i) => i))
+                  .range([0, innerWidth])
+                  .padding(0.1) // 矩形之间的间距
+
+// y 轴比例尺
+const yScale = d3.scaleLinear()
+                  .domain([0, d3.max(dataset)])
+                  .range([innerHeight, 0])
+
+// 画布的起始位置
+const g = svg.append('g')
+              .attr('id', 'maingroup')
+              .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+// 定义x轴
+const xAxis = d3.axisBottom(xScale)
+// 添加 x 坐标轴
+g.append('g')
+  .call(xAxis)
+  .attr('transform', `translate(0, ${innerHeight})`)
+
+// 定义y轴
+const yAxis = d3.axisLeft(yScale)
+// 添加 y 坐标轴
+g.append('g').call(yAxis)
+
+
+g.selectAll('.my-rect')
+  .data(dataset)
+  .enter()
+  .append('rect')
+  .attr('class', 'my-rect')
+  .on('mouseover', function (d, i) {// 写在transition之前,
+    d3.select(this)                 // 不然会出错
+      .attr('fill', 'yellow')
+  })
+  .on('mouseout', function (d, i) {
+    d3.select(this)
+      .transition()
+      .duration(500)
+      .attr('fill', 'steelblue')
+  })
+  .attr('x', (d, i) => {// 绘制的 x 轴起点位置
+    return xScale(i)
+  })
+  .attr('width', () => {// 绘制矩形的宽度
+    return xScale.bandwidth()
+  })
+  .attr('y', d => {// 过渡 y 轴起点位置
+    return yScale(0)
+  })
+  .transition()
+  .duration(2000)
+  .delay((d, i) => 200 * i)
+  .attr('y', d => {// 绘制的 y 轴起点位置
+    return yScale(d)
+  })
+  .attr('height', d => {// 绘制矩形的高度
+    return innerHeight - yScale(d)
+  })
+  .attr('fill', 'steelblue') // 矩形填充颜色
+  
+g.selectAll('.my-text')
+  .data(dataset)
+  .enter()
+  .append('text')
+  .attr('x', (d, i) => {// 绘制的 x 轴起点位置
+    return xScale(i)
+  })
+  .attr('y', () => {// 绘制的 y 轴起点位置
+    let min = yScale.domain()[0]
+    return yScale(min)
+  })
+  .transition()
+  .duration(2000)
+  .delay((d, i) => 200 * i)
+  .ease(d3.easeBounce)
+  .attr('y', d => {// 绘制的 y 轴起点位置
+    return yScale(d)
+  })
+  .attr('dx', () => xScale.bandwidth() / 2)// 偏移x轴
+  .attr('dy', () => 20)// 偏移y轴20px
+  .text(d => d)
+  .attr('text-anchor', 'middle')
+  .attr('fill', '#fff')
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 
+    库
+    topojson
+    d3-tip
+   -->
+  <svg id="mainsvg" width="800" height="400"></svg>
+  <script src="./d3.min.js"></script>
+  <script>
+    const data = [
+      { name: '01', value: 16 },
+      { name: '02', value: 6 },
+      { name: '03', value: 20 },
+      { name: '04', value: 30 },
+      { name: '05', value: 18 },
+      { name: '06', value: 2 },
+      { name: '07', value: 50 },
+      { name: '08', value: 15 },
+    ]
+    const svg = d3.select('#mainsvg') // 获取画布
+    const width = +svg.attr('width') // 获取画布的宽度
+    const height = +svg.attr('height') // 获取画布的高度
+    const margin = { top: 60, right: 30, bottom: 60, left: 50 }
+    const innerWidth = width - margin.left - margin.right // 画布中内容的宽度
+    const innerHeight = height - margin.top - margin.bottom // 画布中内容的高度
+
+    const xScale = d3.scaleLinear() // 定义x轴的比例尺
+                    .domain([0, d3.max(data, d => d.value)])
+                    .range([0, innerWidth])
+    const yScale = d3.scaleBand() // 定义y轴的比例尺
+                    .domain(data.map(d => d.name))
+                    .range([0, innerHeight])
+                    .padding(0.1)
+    
+    const g = svg.append('g')
+                .attr('id', 'maingroup')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`)
+    
+    // 定义y轴方向上的坐标轴 左侧坐标轴
+    const yAxis = d3.axisLeft(yScale)
+    g.append('g').call(yAxis)
+
+    // 定义x轴方向上的坐标轴 底侧坐标轴
+    const xAxis = d3.axisBottom(xScale)
+    g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`)
+
+    data.forEach(d => {
+      g.append('rect')
+        .transition()
+        .duration(1000)
+        .attr('width', xScale(d.value))
+        .attr('height', yScale.bandwidth())
+        .attr('fill', 'green')
+        .attr('opacity', 0.8)
+        .attr('y', yScale(d.name))
+    })
+
+    // 设置x、y轴文字的大小
+    d3.selectAll('.tick text').attr('font-size', '1.5em')
+
+    // 添加标题
+    g.append('text').text('wangfeng d3 demo')
+      .attr('font-size', '2em')
+      .attr('transform', `translate(${innerWidth / 2}, 0)`)
+      .attr('text-anchor', 'middle')
+  </script>
+</body>
+</html>

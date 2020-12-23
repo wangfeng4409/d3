@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Document</title>
+</head>
+<body>
+  <script src='./d3.min.js'></script>
+  <script>
+// 画布大小
+const width = 800;  //画布的宽度
+const height = 600; //画布的高度
+
+// 在body里添加一个SVG画布
+const svg = d3.select('body')     //选择文档中的body元素
+              .append('svg')      //添加一个svg元素
+              .attr('width', width)  //设定宽度
+              .attr('height', height); //设定高度
+
+const dataset = [ 30 , 10 , 43 , 55 , 13 ];
+
+const pie = d3.pie();
+const piedata = pie(dataset);
+
+const outerRadius = 150; //外半径
+const innerRadius = 100; //内半径，为0则中间没有空白
+
+const arc = d3.arc()  //弧生成器
+    .innerRadius(innerRadius)   //设置内半径
+    .outerRadius(outerRadius);  //设置外半径
+
+const g = svg.selectAll('g')
+              .data(piedata)
+              .enter()
+              .append('g')
+              .attr('transform', 'translate('+ (width/4) +','+ (width/4) +')');
+
+g.append('path')
+    .attr('fill', (d,i) => {
+        return d3.schemeCategory10[i];// 有10种颜色的颜色比例尺
+    })
+    .attr('d', (d) => {
+        return arc(d);//调用弧生成器，得到路径值
+    });
+
+g.append('text')
+    .attr('transform', (d) => {
+        return 'translate(' + arc.centroid(d) + ')';
+    })
+    .attr('text-anchor','middle')
+    .attr('fill', '#fff')
+    .text((d) => {
+        return d.data;
+    });
+
+  </script>
+</body>
+</html>
